@@ -1,0 +1,26 @@
+name: Publish Updated HTML
+
+on:
+  repository_dispatch:
+    types: [publish-update]
+
+jobs:
+  update-file:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Update index.html
+      run: |
+        echo "${{ github.event.client_payload.content }}" > index.html
+
+    - name: Commit and push changes
+      run: |
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git add index.html
+        git commit -m "Automated publish from admin tool" || echo "No changes to commit"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
