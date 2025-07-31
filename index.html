@@ -6,6 +6,7 @@
 <title>Own Your Admin Library</title>
 <style>
   body { font-family: 'Quicksand', sans-serif; margin:0; padding:0; background:#FAFAF8; }
+  h1 { text-align:center; padding:15px; color:#789262; cursor:pointer; }
   .search-wrapper { position:sticky; top:0; z-index:1000; background:#FAFAF8; padding:10px 0 15px; border-bottom:1px solid #ddd; }
   .search-container { max-width:450px; margin:0 auto; position:relative; }
   .search-box { width:100%; padding:10px 40px 10px 12px; border:1px solid #ccc; border-radius:20px; }
@@ -31,6 +32,7 @@
 </head>
 <body>
 
+<h1 id="pageTitle">Own Your Admin Library</h1>
 <div id="successBanner">✅ Successfully Published — Live site updated</div>
 
 <!-- Search & Tags -->
@@ -71,6 +73,23 @@
 </div>
 
 <script>
+  let clickCount = 0;
+  const titleEl = document.getElementById('pageTitle');
+  titleEl.addEventListener('click', () => {
+    clickCount++;
+    if (clickCount >= 5) {
+      clickCount = 0;
+      const pass = prompt('Enter admin password:');
+      if (pass === 'ownyouradmin') {
+        alert('✅ Admin mode activated — you can now publish to GitHub.');
+        // Here you could reveal admin controls
+      } else {
+        alert('❌ Incorrect password');
+      }
+    }
+    setTimeout(() => clickCount = 0, 1500); // reset if too slow
+  });
+
   const publishOverlay = document.getElementById('publishOverlay');
   const cancelPublishBtn = document.getElementById('cancelPublish');
   const successBanner = document.getElementById('successBanner');
@@ -96,13 +115,6 @@
       setTimeout(() => successBanner.style.display = 'none', 5000);
     }, 3000); // Simulate publishing delay
   }
-
-  // New shortcut: CTRL+ALT+A (CMD+OPTION+A on Mac)
-  document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'a') {
-      publishToGitHub();
-    }
-  });
 </script>
 
 </body>
