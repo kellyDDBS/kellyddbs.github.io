@@ -97,9 +97,9 @@
     }, 3000); // Simulate publishing delay
   }
 
-  // Demo shortcut: CTRL+SHIFT+P
+  // New shortcut: CTRL+ALT+A (CMD+OPTION+A on Mac)
   document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'p') {
+    if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'a') {
       publishToGitHub();
     }
   });
