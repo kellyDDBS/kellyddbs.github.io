@@ -1,4 +1,211 @@
 <!DOCTYPE html>
-<!-- The entire final index.html content goes here -->
-<!-- Truncated here for clarity but matches what was just built -->
-<!-- (admin panel, embed, download/save, YouTube subscribe, GitHub publish) -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Own Your Admin Video Library</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
+  margin: 0;
+  padding: 0;
+}
+header {
+  background: #fff;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+}
+header h1 {
+  font-size: 1.2rem;
+}
+.coffee-cup {
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+#video-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+  padding: 15px;
+}
+.card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.card iframe {
+  width: 100%;
+  height: 200px;
+  border: none;
+}
+.card .content {
+  padding: 10px;
+}
+.card h3 {
+  margin: 0 0 8px;
+}
+.card .buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+button, a.button {
+  background: #6c63ff;
+  color: #fff;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+button:hover, a.button:hover {
+  background: #584ee4;
+}
+#admin-panel {
+  display: none;
+  padding: 15px;
+  background: #fff;
+  border-top: 2px solid #ccc;
+}
+#admin-panel input, #admin-panel textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+}
+.publish-btn {
+  background: #28a745;
+}
+.publish-btn:hover {
+  background: #218838;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Own Your Admin Video Library</h1>
+  <div class="coffee-cup" id="coffee-cup">☕</div>
+</header>
+
+<div id="video-container"></div>
+
+<!-- Admin Panel -->
+<div id="admin-panel">
+  <h2>Admin Panel</h2>
+  <input type="text" id="video-title" placeholder="Title">
+  <input type="text" id="video-tags" placeholder="Tags (comma separated)">
+  <textarea id="video-embed" placeholder="Embed code (iframe)"></textarea>
+  <input type="text" id="video-download" placeholder="Download / Save Link (optional)">
+  <button id="add-video">Add Video</button>
+  <button class="publish-btn" id="publish">Publish to GitHub</button>
+</div>
+
+<!-- Disqus placeholder -->
+<!-- <div id="disqus_thread"></div> -->
+
+<script>
+let coffeeClicks = 0;
+const coffeeCup = document.getElementById('coffee-cup');
+const adminPanel = document.getElementById('admin-panel');
+const videoContainer = document.getElementById('video-container');
+
+// Preloaded videos so visitors see content immediately
+let videos = [
+  {
+    title: "Getting Started with MailerLite: Setup & DNS Configuration",
+    tags: "MailerLite,DNS,Email Setup",
+    embed: `<iframe src="https://gamma.app/embed/ca6xz0wmw6bubrl" style="width: 700px; max-width: 100%; height: 450px" allow="fullscreen" title="Getting Started with MailerLite: Setup & DNS Configuration from Scratch"></iframe>`,
+    download: "https://drive.google.com/file/d/1HOaDYl6pJcb4iFToTT-PbrYCF089gkmn/view?usp=sharing"
+  }
+];
+
+coffeeCup.addEventListener('click', () => {
+  coffeeClicks++;
+  if (coffeeClicks >= 5) {
+    const pw = prompt('Enter admin password:');
+    if (pw === 'ownyouradmin') {
+      adminPanel.style.display = 'block';
+    } else {
+      alert('Incorrect password');
+    }
+    coffeeClicks = 0;
+  }
+});
+
+function loadVideos() {
+  videoContainer.innerHTML = '';
+  const storedVideos = JSON.parse(localStorage.getItem('videos') || '[]');
+  const allVideos = [...videos, ...storedVideos];
+
+  allVideos.forEach((v, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="embed">${v.embed}</div>
+      <div class="content">
+        <h3>${v.title}</h3>
+        <div class="buttons">
+          ${v.download 
+            ? `<a href="${v.download}" target="_blank" class="button">⬇ Download This</a>`
+            : `<button onclick="saveForLater(${idx})">⭐ Save for Later</button>`
+          }
+          ${v.embed.includes('youtube.com') || v.embed.includes('youtu.be')
+            ? `<a href="https://www.youtube.com/@ownyouradmin?sub_confirmation=1" target="_blank" class="button">📺 Subscribe</a>`
+            : ''
+          }
+        </div>
+      </div>
+    `;
+    videoContainer.appendChild(card);
+  });
+}
+
+function saveForLater(index) {
+  alert('Saved for later!');
+}
+
+document.getElementById('add-video').addEventListener('click', () => {
+  const title = document.getElementById('video-title').value.trim();
+  const tags = document.getElementById('video-tags').value.trim();
+  const embed = document.getElementById('video-embed').value.trim();
+  const download = document.getElementById('video-download').value.trim();
+  
+  if (!title || !embed) {
+    alert('Title and Embed code are required');
+    return;
+  }
+
+  const storedVideos = JSON.parse(localStorage.getItem('videos') || '[]');
+  storedVideos.push({ title, tags, embed, download });
+  localStorage.setItem('videos', JSON.stringify(storedVideos));
+  loadVideos();
+});
+
+document.getElementById('publish').addEventListener('click', async () => {
+  try {
+    const res = await fetch('https://delicate-sorbet-309267.netlify.app/.netlify/functions/publish', {
+      method: 'POST'
+    });
+    if (res.ok) {
+      alert('Publish triggered!');
+    } else {
+      alert('Publish failed');
+    }
+  } catch (err) {
+    alert('Error triggering publish');
+  }
+});
+
+loadVideos();
+</script>
+
+</body>
+</html>
