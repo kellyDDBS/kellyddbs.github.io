@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Own Your Admin Video Library</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -27,15 +28,27 @@ header h1 {
   font-size: 1.5rem;
 }
 #controls {
-  display: flex;
-  gap: 10px;
-  padding: 10px;
   background: #fff;
+  padding: 10px;
   border-bottom: 1px solid #ddd;
 }
 #search {
-  flex: 1;
+  width: 100%;
   padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+#tags {
+  margin-top: 10px;
+}
+.tag {
+  display: inline-block;
+  background: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  margin: 4px;
+  font-size: 0.85rem;
 }
 #video-container {
   display: grid;
@@ -98,7 +111,7 @@ button:hover, a.button:hover {
   background: #218838;
 }
 /* Modal styles */
-#video-modal {
+#video-modal, #download-modal {
   display: none;
   position: fixed;
   top: 0; left: 0;
@@ -109,24 +122,34 @@ button:hover, a.button:hover {
   align-items: center;
   z-index: 999;
 }
-#video-modal .modal-content {
+.modal-content {
   position: relative;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
   width: 90%;
-  max-width: 1200px;
-  background: #000;
+  max-width: 500px;
 }
 #video-modal iframe {
   width: 100%;
   height: 80vh;
   border: none;
 }
-#video-modal .close {
+.close {
   position: absolute;
   top: 10px;
   right: 15px;
   font-size: 2rem;
-  color: #fff;
   cursor: pointer;
+}
+.small-text {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: -5px;
+  margin-bottom: 10px;
+}
+.error {
+  border-color: red !important;
 }
 </style>
 </head>
@@ -139,6 +162,7 @@ button:hover, a.button:hover {
 
 <div id="controls">
   <input type="text" id="search" placeholder="Search videos...">
+  <div id="tags"></div>
 </div>
 
 <div id="video-container"></div>
@@ -154,7 +178,7 @@ button:hover, a.button:hover {
   <button class="publish-btn" id="publish">Publish to GitHub</button>
 </div>
 
-<!-- Modal -->
+<!-- Video Modal -->
 <div id="video-modal">
   <div class="modal-content">
     <span class="close" id="modal-close">&times;</span>
@@ -162,7 +186,21 @@ button:hover, a.button:hover {
   </div>
 </div>
 
-<!-- External JS with cache-buster -->
-<script src="library.js?v=1.0.0"></script>
+<!-- Download Modal -->
+<div id="download-modal">
+  <div class="modal-content">
+    <span class="close" id="download-close">&times;</span>
+    <h2>Get your download</h2>
+    <input type="text" id="dl-name" placeholder="First name">
+    <input type="email" id="dl-email" placeholder="Email address">
+    <div class="small-text">
+      We’ll email you the download link and add you to our mailing list for helpful tips and resources. You can unsubscribe at any time.
+    </div>
+    <button id="dl-submit">Send me the download</button>
+    <div id="dl-message"></div>
+  </div>
+</div>
+
+<script src="library.js"></script>
 </body>
 </html>
