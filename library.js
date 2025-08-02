@@ -1,6 +1,6 @@
 // ===== CONFIG =====
-const mailerLiteAPIKey = "YOUR_API_KEY_HERE"; // Replace with your MailerLite API key
-const segmentId = "YOUR_SEGMENT_ID_HERE"; // Replace with your MailerLite segment ID
+const mailerLiteAPIKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0IiwianRpIjoiNWY2MzZlYzIxMzMzODI3NzZkYjk3NTg5N2E3ODhkY2UxNmM0N2Q5MmNmMDk5NWUxZDRlNDgyMGZiMDRmNDQyYWM1ZmVkMDE2NTgxNjMxZTciLCJpYXQiOjE3NTQwNTc5ODkuNzUxNTkyLCJuYmYiOjE3NTQwNTc5ODkuNzUxNTk2LCJleHAiOjQ5MDk3MzE1ODkuNzQ3MjQ4LCJzdWIiOiIxNzIwNjA4Iiwic2NvcGVzIjpbXX0.AaOzFw3e6MnSpBhV32063vMJXvXtfSf2bsPHtEC-xYYXmR9RYZ5ezE_OL8ONJImE4g6MKDdGq5M33Gf-CcJl8RuSYYK9whUV_GHW1Z07GbZPOdenc8X2ebCfwy5JiG78y29vnfyF2qyxHPT-a746r7n8VmAVug7wDZUq87X_F37py44WEZ2BfMFgBh1b7UWt96Y9GcYVbfgvMor7nPB4ew55ifWnfxSQC1X7YF9eqspiv5ikmqfTllW4TnOo6YrWxNCVHzhs_AcYoNxmU-2atGSRc0QVIDIo-lwN8D80B6hzsQcjBRQHwY2t8KMgB9eU1wPJkSmr26cxqroxEC1L7hD72iH6kAZlMV3X4ExoPgHfQENHRCiG6zn6PsMJQfmKPUn9Ulb23IinD96gN65RpwIN3LSPMv5Qd4_h5pI0cVMPdhHlMnjGzSkieXLDrlVRdtRqkOOlcHmEdWUtiM8u_v5W4DfZk2vYWDCEJvtF9z8xYNgWscmlXfTPUrVYxYlrDFjj5TWkVfeyG2f90S0LAuuBh7wewQLvA_WUC_e4D6YQcSd1cVqJVQDLwW3lovjkdLnROide83pCIRmxRR_5aMj3HhgCfEgFkBSMbcYhW8k5IPJz7IW-H8EDolyam057Gjye9VfhdFWa8ofnIMYPjHjbd13Xl3AO9or6vUNI1WY"; 
+const segmentId = "161541555630376813"; 
 
 // ===== STATE =====
 let coffeeClicks = 0;
@@ -57,6 +57,7 @@ coffeeCup.addEventListener("click", () => {
 // ===== RENDER VIDEOS =====
 function renderVideos(list) {
   videoContainer.innerHTML = "";
+  allTags.clear();
   list.forEach((v, idx) => {
     const card = document.createElement("div");
     card.className = "card";
@@ -78,7 +79,6 @@ function renderVideos(list) {
     `;
     videoContainer.appendChild(card);
 
-    // Collect tags
     v.tags.split(",").forEach(tag => allTags.add(tag.trim()));
   });
 }
