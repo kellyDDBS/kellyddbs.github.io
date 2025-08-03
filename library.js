@@ -157,7 +157,7 @@ document.getElementById("add-video").addEventListener("click", () => {
   renderTags();
 });
 
-// Gated download submit
+// Gated download submit (via Netlify function)
 dlSubmit.addEventListener("click", async () => {
   dlName.classList.remove("error");
   dlEmail.classList.remove("error");
@@ -173,28 +173,30 @@ dlSubmit.addEventListener("click", async () => {
   }
 
   dlMessage.textContent = "Adding you to the list...";
-  
+
   try {
-    const res = await fetch(`https://connect.mailerlite.com/api/subscribers`, {
+    const res = await fetch("/.netlify/functions/add-subscriber", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${mailerLiteAPIKey}`
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: dlEmail.value.trim(),
-        fields: { name: dlName.value.trim() },
-        status: "active",
-        groups: [groupId]
+        name: dlName.value.trim(),
+        email: dlEmail.value.trim()
       })
     });
 
+    const data = await res.json();
+
     if (res.ok) {
-      dlMessage.innerHTML = `<strong>✅ You're in!</strong><br><a href="${downloadModal.dataset.downloadUrl}" target="_blank" class="button">Download Now</a>`;
+      dlMessage.innerHTML = `
+        <div class="download-success">
+          ✅ You're in!<br>
+          <a href="${downloadModal.dataset.downloadUrl}" target="_blank" class="button">⬇ Download Now</a>
+        </div>
+      `;
     } else {
-      dlMessage.textContent = "Something went wrong. Please try again.";
+      dlMessage.textContent = data?.message || "Something went wrong. Please try again.";
     }
   } catch (err) {
-    dlMessage.textContent = "Error connecting to MailerLite.";
+    dlMessage.textContent = "Error connecting to the server.";
   }
 });
