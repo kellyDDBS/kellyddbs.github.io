@@ -2,6 +2,8 @@ const mailerLiteAPIKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0Iiwia
 const groupId = "161641396708574417";
 
 let coffeeClicks = 0;
+
+// Hardcoded first video so something always shows
 let videos = [
   {
     title: "Getting Started with MailerLite: Setup & DNS Configuration",
@@ -10,8 +12,10 @@ let videos = [
     download: "https://drive.google.com/file/d/1HOaDYl6pJcb4iFToTT-PbrYCF089gkmn/view?usp=sharing"
   }
 ];
+
 let allTags = new Set();
 
+// DOM references
 const coffeeCup = document.getElementById("coffee-cup");
 const adminPanel = document.getElementById("admin-panel");
 const videoContainer = document.getElementById("video-container");
@@ -27,9 +31,11 @@ const dlEmail = document.getElementById("dl-email");
 const dlSubmit = document.getElementById("dl-submit");
 const dlMessage = document.getElementById("dl-message");
 
+// Initial render
 renderVideos(videos);
 renderTags();
 
+// Coffee cup unlock
 coffeeCup.addEventListener("click", () => {
   coffeeClicks++;
   if (coffeeClicks >= 5) {
@@ -46,23 +52,37 @@ coffeeCup.addEventListener("click", () => {
 function renderVideos(list) {
   videoContainer.innerHTML = "";
   allTags.clear();
+
   list.forEach((v, idx) => {
     const card = document.createElement("div");
     card.className = "card";
+
+    let buttonHTML = "";
+
+    if (v.download && v.download.toLowerCase().endsWith(".pdf")) {
+      // PDF link — open directly
+      buttonHTML = `<a href="${v.download}" target="_blank" class="button">📄 View PDF</a>`;
+    } else if (v.download) {
+      // Normal download — gated
+      buttonHTML = `<button onclick="openDownloadModal('${v.download}')">⬇ Download This</button>`;
+    } else {
+      // No download — save for later
+      buttonHTML = `<button onclick="saveForLater(${idx})">⭐ Save for Later</button>`;
+    }
+
     card.innerHTML = `
-      <div class="embed" onclick="openModal('${encodeURIComponent(v.embed)}')">${v.embed}</div>
+      ${v.embed ? `<div class="embed" onclick="openModal('${encodeURIComponent(v.embed)}')">${v.embed}</div>` : ""}
       <div class="content">
         <h3>${v.title}</h3>
-        <div class="buttons">
-          ${v.download 
-            ? `<button onclick="openDownloadModal('${v.download}')">⬇ Download This</button>`
-            : `<button onclick="saveForLater(${idx})">⭐ Save for Later</button>`
-          }
-        </div>
+        <div class="buttons">${buttonHTML}</div>
       </div>
     `;
     videoContainer.appendChild(card);
-    v.tags.split(",").forEach(tag => allTags.add(tag.trim()));
+
+    // Collect tags
+    if (v.tags) {
+      v.tags.split(",").forEach(tag => allTags.add(tag.trim()));
+    }
   });
 }
 
@@ -95,6 +115,7 @@ searchInput.addEventListener("input", () => {
   renderVideos(filtered);
 });
 
+// Video modal
 function openModal(embed) {
   const decoded = decodeURIComponent(embed);
   modalVideo.innerHTML = decoded;
@@ -105,6 +126,7 @@ modalClose.addEventListener("click", () => {
   modalVideo.innerHTML = "";
 });
 
+// Download modal
 function openDownloadModal(downloadUrl) {
   downloadModal.dataset.downloadUrl = downloadUrl;
   downloadModal.style.display = "flex";
@@ -117,14 +139,15 @@ function saveForLater(index) {
   alert("Saved for later!");
 }
 
+// Add video (admin panel)
 document.getElementById("add-video").addEventListener("click", () => {
   const title = document.getElementById("video-title").value.trim();
   const tags = document.getElementById("video-tags").value.trim();
   const embed = document.getElementById("video-embed").value.trim();
   const download = document.getElementById("video-download").value.trim();
   
-  if (!title || !embed) {
-    alert("Title and Embed code are required");
+  if (!title) {
+    alert("Title is required");
     return;
   }
 
@@ -134,6 +157,7 @@ document.getElementById("add-video").addEventListener("click", () => {
   renderTags();
 });
 
+// Gated download submit
 dlSubmit.addEventListener("click", async () => {
   dlName.classList.remove("error");
   dlEmail.classList.remove("error");
