@@ -1,0 +1,9 @@
+{
+  "name": "own-your-admin",
+  "version": "1.0.0",
+  "description": "Own Your Admin site with Netlify functions",
+  "main": "index.html",
+  "dependencies": {
+    "node-fetch": "^2.6.9"
+  }
+}
