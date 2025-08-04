@@ -131,18 +131,41 @@ function clearAdminForm() {
 
 function openModal(video) {
   modalVideo.innerHTML = "";
+
+  // Add video
   const videoWrapper = document.createElement("div");
   videoWrapper.style.width = "100vw";
   videoWrapper.style.height = "100vh";
   videoWrapper.innerHTML = video.embed;
+  modalVideo.appendChild(videoWrapper);
+
+  // Force iframe full width/height after load
+  setTimeout(() => {
+    const iframe = modalVideo.querySelector("iframe");
+    if (iframe) {
+      iframe.removeAttribute("style");
+      iframe.style.width = "100vw";
+      iframe.style.height = "100vh";
+    }
+  }, 100);
+
+  // Add download button outside iframe container
   const dlWrapper = document.createElement("div");
   dlWrapper.id = "download-btn-wrapper";
+  dlWrapper.style.position = "fixed";
+  dlWrapper.style.bottom = "20px";
+  dlWrapper.style.left = "50%";
+  dlWrapper.style.transform = "translateX(-50%)";
+  dlWrapper.style.zIndex = "2000";
   if (video.download) {
     dlWrapper.innerHTML = `<button class="button" onclick="openDownloadModal('${video.download}')">⬇ Download this resource</button>`;
   }
-  modalVideo.appendChild(videoWrapper);
-  modalVideo.appendChild(dlWrapper);
+  document.body.appendChild(dlWrapper);
+
+  // Show modal
   videoModal.style.display = "flex";
+
+  // PDF fallback
   const iframe = document.getElementById("gamma-embed");
   if (iframe) {
     let loaded = false;
@@ -158,6 +181,8 @@ function openModal(video) {
 document.getElementById("modal-close").addEventListener("click", () => {
   videoModal.style.display = "none";
   modalVideo.innerHTML = "";
+  const btn = document.getElementById("download-btn-wrapper");
+  if (btn) btn.remove();
 });
 
 window.openDownloadModal = function(downloadUrl) {
