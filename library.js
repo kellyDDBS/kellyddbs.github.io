@@ -1,11 +1,11 @@
-// Pre-loaded videos array
+// ===== Pre-loaded videos array =====
 let videos = [
   {
     title: "Starting with MailerLite from Scratch",
     tags: "SPF, Emails, MailerLite",
     embed: `<iframe id="gamma-embed"
                     src="https://gamma.app/embed/ca6xz0wmw6bubrl"
-                    style="width: 100%; height: 100%; border: none;"
+                    style="width:100%;height:100%;border:none;"
                     allow="fullscreen"
                     title="Getting Started with MailerLite: Setup & DNS Configuration from Scratch"></iframe>`,
     pdf: `https://drive.google.com/file/d/1HOaDYl6pJcb4iFToTT-PbrYCF089gkmn/preview`,
@@ -15,7 +15,9 @@ let videos = [
 
 let allTags = new Set();
 let coffeeClicks = 0;
+let editingIndex = null; // Track which video is being edited
 
+// ===== DOM references =====
 const coffeeCup = document.getElementById("coffee-cup");
 const adminPanel = document.getElementById("admin-panel");
 const videoContainer = document.getElementById("video-container");
@@ -24,13 +26,14 @@ const tagsContainer = document.getElementById("tags");
 const videoModal = document.getElementById("video-modal");
 const modalVideo = document.getElementById("modal-video");
 
-// Coffee cup unlock
+// ===== Coffee cup unlock =====
 coffeeCup.addEventListener("click", () => {
   coffeeClicks++;
   if (coffeeClicks >= 5) {
     const pw = prompt("Enter admin password:");
     if (pw === "ownyouradmin") {
       adminPanel.style.display = "block";
+      renderAdminList();
     } else {
       alert("Incorrect password");
     }
@@ -38,7 +41,7 @@ coffeeCup.addEventListener("click", () => {
   }
 });
 
-// Render videos
+// ===== Render public video grid =====
 function renderVideos(list) {
   videoContainer.innerHTML = "";
   allTags.clear();
@@ -74,11 +77,7 @@ function renderVideos(list) {
 
     // Click action
     card.addEventListener("click", () => {
-      if (v.embed) {
-        openModal(v);
-      } else if (v.download) {
-        openDownloadModal(v.download);
-      }
+      openModal(v);
     });
 
     videoContainer.appendChild(card);
@@ -90,7 +89,7 @@ function renderVideos(list) {
   renderTags();
 }
 
-// Render tags
+// ===== Render tag filters =====
 function renderTags() {
   tagsContainer.innerHTML = "";
   ["All", ...Array.from(allTags)].forEach(tag => {
@@ -111,7 +110,7 @@ function filterByTag(tag) {
   }
 }
 
-// Search
+// ===== Search =====
 searchInput.addEventListener("input", () => {
   const term = searchInput.value.toLowerCase();
   const filtered = videos.filter(v =>
@@ -121,7 +120,7 @@ searchInput.addEventListener("input", () => {
   renderVideos(filtered);
 });
 
-// Add video or download
+// ===== Add / Edit video =====
 document.getElementById("add-video").addEventListener("click", () => {
   const title = document.getElementById("video-title").value.trim();
   const tags = document.getElementById("video-tags").value.trim();
@@ -134,35 +133,98 @@ document.getElementById("add-video").addEventListener("click", () => {
     return;
   }
 
-  videos.push({ title, tags, embed, pdf, download });
+  const videoData = { title, tags, embed, pdf, download };
+
+  if (editingIndex !== null) {
+    videos[editingIndex] = videoData;
+    editingIndex = null;
+  } else {
+    videos.push(videoData);
+  }
+
   localStorage.setItem("videos", JSON.stringify(videos));
   renderVideos(videos);
+  renderAdminList();
+  clearAdminForm();
 });
 
-// Modal handling with PDF fallback
+// ===== Admin list with Edit buttons =====
+function renderAdminList() {
+  const adminList = document.getElementById("admin-list") || document.createElement("div");
+  adminList.id = "admin-list";
+  adminList.innerHTML = "<h3>Current Videos</h3>";
+
+  videos.forEach((v, i) => {
+    const item = document.createElement("div");
+    item.textContent = `${v.title} (${v.tags}) `;
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Edit";
+    editBtn.style.marginLeft = "10px";
+    editBtn.onclick = () => {
+      loadVideoToForm(i);
+    };
+    item.appendChild(editBtn);
+    adminList.appendChild(item);
+  });
+
+  adminPanel.appendChild(adminList);
+}
+
+// ===== Load video into form for editing =====
+function loadVideoToForm(index) {
+  const v = videos[index];
+  document.getElementById("video-title").value = v.title;
+  document.getElementById("video-tags").value = v.tags;
+  document.getElementById("video-embed").value = v.embed;
+  if (document.getElementById("video-pdf")) {
+    document.getElementById("video-pdf").value = v.pdf || "";
+  }
+  document.getElementById("video-download").value = v.download;
+  editingIndex = index;
+}
+
+// ===== Clear admin form =====
+function clearAdminForm() {
+  document.getElementById("video-title").value = "";
+  document.getElementById("video-tags").value = "";
+  document.getElementById("video-embed").value = "";
+  if (document.getElementById("video-pdf")) {
+    document.getElementById("video-pdf").value = "";
+  }
+  document.getElementById("video-download").value = "";
+}
+
+// ===== Modal with PDF fallback =====
 function openModal(video) {
-  modalVideo.innerHTML = video.embed;
+  modalVideo.innerHTML = "";
+
+  // Video/PDF container
+  const videoWrapper = document.createElement("div");
+  videoWrapper.style.flex = "1";
+  videoWrapper.innerHTML = video.embed;
+
+  // Download button
+  const dlWrapper = document.createElement("div");
+  dlWrapper.style.textAlign = "center";
+  dlWrapper.style.marginTop = "15px";
+  if (video.download) {
+    dlWrapper.innerHTML = `<a href="${video.download}" target="_blank" class="button">⬇ Download this resource</a>`;
+  }
+
+  modalVideo.appendChild(videoWrapper);
+  modalVideo.appendChild(dlWrapper);
   videoModal.style.display = "flex";
 
+  // PDF fallback if Gamma doesn't load
   const iframe = document.getElementById("gamma-embed");
-
   if (iframe) {
     let loaded = false;
     iframe.onload = () => { loaded = true; };
     setTimeout(() => {
-      if (!loaded) {
-        modalVideo.innerHTML = `<iframe src="${video.pdf}" style="width:100%;height:100%;border:none;"></iframe>`;
+      if (!loaded && video.pdf) {
+        videoWrapper.innerHTML = `<iframe src="${video.pdf}" style="width:100%;height:100%;border:none;"></iframe>`;
       }
-    }, 3000); // 3s timeout before swapping to PDF
-  }
-
-  // Add download button if available
-  if (video.download) {
-    const dlBtn = document.createElement("div");
-    dlBtn.style.textAlign = "center";
-    dlBtn.style.marginTop = "15px";
-    dlBtn.innerHTML = `<a href="${video.download}" target="_blank" class="button">⬇ Download this resource</a>`;
-    modalVideo.appendChild(dlBtn);
+    }, 3000);
   }
 }
 
@@ -171,7 +233,7 @@ document.getElementById("modal-close").addEventListener("click", () => {
   modalVideo.innerHTML = "";
 });
 
-// Gated download
+// ===== Gated download =====
 function openDownloadModal(downloadUrl) {
   const dlModal = document.getElementById("download-modal");
   dlModal.dataset.downloadUrl = downloadUrl;
@@ -212,5 +274,5 @@ document.getElementById("dl-submit").addEventListener("click", async () => {
   }
 });
 
-// Initial render
+// ===== Initial render =====
 renderVideos(videos);
