@@ -1,4 +1,13 @@
-let videos = JSON.parse(localStorage.getItem("videos") || "[]");
+// Pre-loaded videos array
+let videos = [
+  {
+    title: "Starting with MailerLite from Scratch",
+    tags: "SPF, Emails, MailerLite",
+    embed: `<iframe src="https://gamma.app/embed/ca6xz0wmw6bubrl" style="width: 700px; max-width: 100%; height: 450px" allow="fullscreen" title="Getting Started with MailerLite: Setup & DNS Configuration from Scratch"></iframe>`,
+    download: "https://drive.google.com/file/d/1HOaDYl6pJcb4iFToTT-PbrYCF089gkmn/view?usp=drive_link"
+  }
+];
+
 let allTags = new Set();
 let coffeeClicks = 0;
 
