@@ -1,5 +1,3 @@
-const mailerLiteAPIKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0IiwianRpIjoiNWY2MzZlYzIxMzMzODI3NzZkYjk3NTg5N2E3ODhkY2UxNmM0N2Q5MmNmMDk5NWUxZDRlNDgyMGZiMDRmNDQyYWM1ZmVkMDE2NTgxNjMxZTciLCJpYXQiOjE3NTQwNTc5ODkuNzUxNTkyLCJuYmYiOjE3NTQwNTc5ODkuNzUxNTk2LCJleHAiOjQ5MDk3MzE1ODkuNzQ3MjQ4LCJzdWIiOiIxNzIwNjA4Iiwic2NvcGVzIjpbXX0.AaOzFw3e6MnSpBhV32063vMJXvXtfSf2bsPHtEC-xYYXmR9RYZ5ezE_OL8ONJImE4g6MKDdGq5M33Gf-CcJl8RuSYYK9whUV_GHW1Z07GbZPOdenc8X2ebCfwy5JiG78y29vnfyF2qyxHPT-a746r7n8VmAVug7wDZUq87X_F37py44WEZ2BfMFgBh1b7UWt96Y9GcYVbfgvMor7nPB4ew55ifWnfxSQC1X7YF9eqspiv5ikmqfTllW4TnOo6YrWxNCVHzhs_AcYoNxmU-2atGSRc0QVIDIo-lwN8D80B6hzsQcjBRQHwY2t8KMgB9eU1wPJkSmr26cxqroxEC1L7hD72iH6kAZlMV3X4ExoPgHfQENHRCiG6zn6PsMJQfmKPUn9Ulb23IinD96gN65RpwIN3LSPMv5Qd4_h5pI0cVMPdhHlMnjGzSkieXLDrlVRdtRqkOOlcHmEdWUtiM8u_v5W4DfZk2vYWDCEJvtF9z8xYNgWscmlXfTPUrVYxYlrDFjj5TWkVfeyG2f90S0LAuuBh7wewQLvA_WUC_e4D6YQcSd1cVqJVQDLwW3lovjkdLnROide83pCIRmxRR_5aMj3HhgCfEgFkBSMbcYhW8k5IPJz7IW-H8EDolyam057Gjye9VfhdFWa8ofnIMYPjHjbd13Xl3AO9or6vUNI1WY";
-const groupId = "161641396708574417";
 
 let coffeeClicks = 0;
 
@@ -60,26 +58,22 @@ function renderVideos(list) {
     let buttonHTML = "";
 
     if (v.download && v.download.toLowerCase().endsWith(".pdf")) {
-      // PDF link — open directly
-      buttonHTML = `<a href="${v.download}" target="_blank" class="button">📄 View PDF</a>`;
+      buttonHTML = `<a href="\${v.download}" target="_blank" class="button">📄 View PDF</a>`;
     } else if (v.download) {
-      // Normal download — gated
-      buttonHTML = `<button onclick="openDownloadModal('${v.download}')">⬇ Download This</button>`;
+      buttonHTML = `<button onclick="openDownloadModal('\${v.download}')">⬇ Download This</button>`;
     } else {
-      // No download — save for later
-      buttonHTML = `<button onclick="saveForLater(${idx})">⭐ Save for Later</button>`;
+      buttonHTML = `<button onclick="saveForLater(\${idx})">⭐ Save for Later</button>`;
     }
 
-    card.innerHTML = `
-      ${v.embed ? `<div class="embed" onclick="openModal('${encodeURIComponent(v.embed)}')">${v.embed}</div>` : ""}
+    card.innerHTML = \`
+      \${v.embed ? `<div class="embed" onclick="openModal('\${encodeURIComponent(v.embed)}')">\${v.embed}</div>` : ""}
       <div class="content">
-        <h3>${v.title}</h3>
-        <div class="buttons">${buttonHTML}</div>
+        <h3>\${v.title}</h3>
+        <div class="buttons">\${buttonHTML}</div>
       </div>
-    `;
+    \`;
     videoContainer.appendChild(card);
 
-    // Collect tags
     if (v.tags) {
       v.tags.split(",").forEach(tag => allTags.add(tag.trim()));
     }
@@ -145,7 +139,7 @@ document.getElementById("add-video").addEventListener("click", () => {
   const tags = document.getElementById("video-tags").value.trim();
   const embed = document.getElementById("video-embed").value.trim();
   const download = document.getElementById("video-download").value.trim();
-  
+
   if (!title) {
     alert("Title is required");
     return;
@@ -157,7 +151,7 @@ document.getElementById("add-video").addEventListener("click", () => {
   renderTags();
 });
 
-// Gated download submit (via Netlify function)
+// Gated download via Netlify function
 dlSubmit.addEventListener("click", async () => {
   dlName.classList.remove("error");
   dlEmail.classList.remove("error");
@@ -184,19 +178,20 @@ dlSubmit.addEventListener("click", async () => {
       })
     });
 
-    const data = await res.json();
+    const result = await res.json();
 
-    if (res.ok) {
+    if (res.ok && result.message) {
       dlMessage.innerHTML = `
         <div class="download-success">
-          ✅ You're in!<br>
-          <a href="${downloadModal.dataset.downloadUrl}" target="_blank" class="button">⬇ Download Now</a>
+          ✅ You're in!  
+          <a href="${downloadModal.dataset.downloadUrl}" target="_blank">⬇ Download Now</a>
         </div>
       `;
     } else {
-      dlMessage.textContent = data?.message || "Something went wrong. Please try again.";
+      dlMessage.textContent = "Something went wrong. Please try again.";
     }
   } catch (err) {
-    dlMessage.textContent = "Error connecting to the server.";
+    console.error(err);
+    dlMessage.textContent = "Error connecting to server.";
   }
 });
