@@ -147,16 +147,11 @@ function openModal(video) {
       iframe.style.width = "100vw";
       iframe.style.height = "100vh";
     }
-  }, 100);
+  }, 50);
 
   // Add download button outside iframe container
   const dlWrapper = document.createElement("div");
   dlWrapper.id = "download-btn-wrapper";
-  dlWrapper.style.position = "fixed";
-  dlWrapper.style.bottom = "20px";
-  dlWrapper.style.left = "50%";
-  dlWrapper.style.transform = "translateX(-50%)";
-  dlWrapper.style.zIndex = "2000";
   if (video.download) {
     dlWrapper.innerHTML = `<button class="button" onclick="openDownloadModal('${video.download}')">⬇ Download this resource</button>`;
   }
