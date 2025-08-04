@@ -132,6 +132,17 @@ downloadClose.addEventListener("click", () => {
 function saveForLater(index) {
   alert("Saved for later!");
 }
+document.getElementById("coffee-cup").addEventListener("click", function () {
+    // Toggle admin panel visibility
+    const adminPanel = document.getElementById("admin-panel");
+    if (adminPanel) {
+        adminPanel.style.display =
+            adminPanel.style.display === "block" ? "none" : "block";
+    } else {
+        alert("Admin panel element not found!");
+    }
+});
+
 
 // Add video (admin panel)
 document.getElementById("add-video").addEventListener("click", () => {
