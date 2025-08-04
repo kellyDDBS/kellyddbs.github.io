@@ -1,9 +1,12 @@
 // Pre-loaded videos array
 let videos = [
   {
-    title: "Starting with MailerLite from Scratch",
+    title: "MailerLite - Adding Your Emails and Domain",
     tags: "SPF, Emails, MailerLite",
-    embed: `<iframe src="https://gamma.app/embed/ca6xz0wmw6bubrl" style="width: 700px; max-width: 100%; height: 450px" allow="fullscreen" title="Getting Started with MailerLite: Setup & DNS Configuration from Scratch"></iframe>`,
+    embed: `<iframe src="https://gamma.app/embed/ca6xz0wmw6bubrl"
+                    style="width: 100%; height: 100%; border: none;"
+                    allow="fullscreen"
+                    title="Getting Started with MailerLite: Setup & DNS Configuration from Scratch"></iframe>`,
     download: "https://drive.google.com/file/d/1HOaDYl6pJcb4iFToTT-PbrYCF089gkmn/view?usp=drive_link"
   }
 ];
@@ -38,7 +41,7 @@ function renderVideos(list) {
   videoContainer.innerHTML = "";
   allTags.clear();
 
-  list.forEach((v, idx) => {
+  list.forEach((v) => {
     const card = document.createElement("div");
     card.className = "card";
     card.style.background = "#f5ebe0";
@@ -70,7 +73,7 @@ function renderVideos(list) {
     // Click action
     card.addEventListener("click", () => {
       if (v.embed) {
-        openModal(v.embed);
+        openModal(v.embed, v.download);
       } else if (v.download) {
         openDownloadModal(v.download);
       }
@@ -134,10 +137,17 @@ document.getElementById("add-video").addEventListener("click", () => {
 });
 
 // Modal handling
-function openModal(embed) {
-  modalVideo.innerHTML = embed;
+function openModal(embed, downloadUrl) {
+  let html = `<div style="width:100%; height:100%;">${embed}</div>`;
+  if (downloadUrl) {
+    html += `<div style="margin-top:15px; text-align:center;">
+               <a href="${downloadUrl}" target="_blank" class="button">⬇ Download this resource</a>
+             </div>`;
+  }
+  modalVideo.innerHTML = html;
   videoModal.style.display = "flex";
 }
+
 document.getElementById("modal-close").addEventListener("click", () => {
   videoModal.style.display = "none";
   modalVideo.innerHTML = "";
@@ -149,6 +159,7 @@ function openDownloadModal(downloadUrl) {
   dlModal.dataset.downloadUrl = downloadUrl;
   dlModal.style.display = "block";
 }
+
 document.getElementById("dl-submit").addEventListener("click", async () => {
   const name = document.getElementById("dl-name").value.trim();
   const email = document.getElementById("dl-email").value.trim();
