@@ -32,7 +32,33 @@ function renderVideos(list) {
   list.forEach((v, idx) => {
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = `<h3>${v.title}</h3>`;
+    card.style.background = "#f5ebe0";
+    card.style.borderRadius = "10px";
+    card.style.boxShadow = "0 4px 10px rgba(0,0,0,0.15)";
+    card.style.padding = "15px";
+    card.style.cursor = "pointer";
+    card.style.textAlign = "center";
+    card.style.transition = "all 0.3s ease";
+
+    const title = document.createElement("h3");
+    title.innerText = v.title;
+    title.style.color = "#333";
+    title.style.margin = "0";
+    title.style.transition = "color 0.3s ease";
+
+    card.appendChild(title);
+
+    // Hover effect
+    card.addEventListener("mouseenter", () => {
+      card.style.background = "#a3b18a";
+      title.style.color = "#fff";
+    });
+    card.addEventListener("mouseleave", () => {
+      card.style.background = "#f5ebe0";
+      title.style.color = "#333";
+    });
+
+    // Click action
     card.addEventListener("click", () => {
       if (v.embed) {
         openModal(v.embed);
@@ -40,6 +66,7 @@ function renderVideos(list) {
         openDownloadModal(v.download);
       }
     });
+
     videoContainer.appendChild(card);
 
     if (v.tags) {
