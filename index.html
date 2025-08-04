@@ -9,7 +9,6 @@ body {
   font-family: Arial, sans-serif;
   background: #f7f7f7;
   margin: 0;
-  padding: 0;
 }
 header {
   background: #fff;
@@ -21,10 +20,10 @@ header {
 }
 header h1 { font-size: 1.2rem; }
 .coffee-cup { cursor: pointer; font-size: 1.5rem; }
-.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-#controls { background: #fff; padding: 15px; border-radius: 8px; margin: 15px 0; }
-#search { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
-#tags { margin-top: 10px; }
+.container { max-width: 1100px; margin: auto; padding: 0 20px; }
+#controls { background: #fff; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center; }
+#search { width: 100%; max-width: 500px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
+#tags { margin-top: 10px; text-align: center; }
 .tag {
   display: inline-block;
   background: #e0e0e0;
@@ -36,20 +35,20 @@ header h1 { font-size: 1.2rem; }
 }
 #video-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
 }
 .card {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  padding: 15px;
+  cursor: pointer;
+  text-align: center;
 }
-.card iframe { width: 100%; height: 200px; border: none; }
-.card .content { padding: 15px; }
-.card h3 { margin: 0 0 8px; }
+.card h3 { margin: 0; font-size: 1rem; }
+#admin-panel { display: none; padding: 15px; background: #fff; margin-top: 15px; }
+#admin-panel input, #admin-panel textarea { width: 100%; margin-bottom: 10px; padding: 8px; }
 button, a.button {
   background: #a3b18a;
   color: #fff;
@@ -58,14 +57,8 @@ button, a.button {
   border-radius: 5px;
   text-decoration: none;
   cursor: pointer;
-  font-size: 1.05rem;
-  font-weight: bold;
 }
 button:hover, a.button:hover { background: #87996f; }
-#admin-panel { display: none; padding: 15px; background: #fff; border-top: 2px solid #ccc; }
-#admin-panel input, #admin-panel textarea { width: 100%; margin-bottom: 10px; padding: 8px; }
-.publish-btn { background: #28a745; }
-.publish-btn:hover { background: #218838; }
 .download-success {
   margin-top: 20px;
   padding: 15px;
@@ -82,9 +75,33 @@ button:hover, a.button:hover { background: #87996f; }
   text-decoration: none;
   padding: 10px 16px;
   border-radius: 5px;
-  font-size: 16px;
 }
 .download-success a:hover { background-color: #73845b; }
+#video-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 900px;
+  width: 90%;
+}
+.modal-content iframe { width: 100%; height: 80vh; }
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 2rem;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -92,23 +109,31 @@ button:hover, a.button:hover { background: #87996f; }
   <h1>Own Your Admin Video Library</h1>
   <div class="coffee-cup" id="coffee-cup">☕</div>
 </header>
+
 <div class="container">
   <div id="controls">
     <input type="text" id="search" placeholder="Search videos...">
     <div id="tags"></div>
   </div>
   <div id="video-container"></div>
+
   <div id="admin-panel">
     <h2>Admin Panel</h2>
     <input type="text" id="video-title" placeholder="Title">
     <input type="text" id="video-tags" placeholder="Tags (comma separated)">
     <textarea id="video-embed" placeholder="Embed code (iframe)"></textarea>
-    <input type="text" id="video-download" placeholder="Download / Save Link (optional)">
+    <input type="text" id="video-download" placeholder="Download link (optional)">
     <button id="add-video">Add Video</button>
   </div>
 </div>
 
-<!-- Download modal -->
+<div id="video-modal">
+  <div class="modal-content">
+    <span class="close" id="modal-close">&times;</span>
+    <div id="modal-video"></div>
+  </div>
+</div>
+
 <div id="download-modal" style="display:none;">
   <div class="modal-content">
     <h2>Get your download</h2>

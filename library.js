@@ -1,4 +1,4 @@
-let videos = [];
+let videos = JSON.parse(localStorage.getItem("videos") || "[]");
 let allTags = new Set();
 let coffeeClicks = 0;
 
@@ -7,6 +7,8 @@ const adminPanel = document.getElementById("admin-panel");
 const videoContainer = document.getElementById("video-container");
 const searchInput = document.getElementById("search");
 const tagsContainer = document.getElementById("tags");
+const videoModal = document.getElementById("video-modal");
+const modalVideo = document.getElementById("modal-video");
 
 // Coffee cup unlock
 coffeeCup.addEventListener("click", () => {
@@ -30,24 +32,14 @@ function renderVideos(list) {
   list.forEach((v, idx) => {
     const card = document.createElement("div");
     card.className = "card";
-
-    let bodyHTML = "";
-    if (v.embed) {
-      bodyHTML += v.embed;
-    }
-    let buttonHTML = "";
-    if (v.download) {
-      buttonHTML = `<button onclick="openDownloadModal('${v.download}')">⬇ Download This</button>`;
-    }
-
-    card.innerHTML = `
-      ${bodyHTML ? bodyHTML : ""}
-      <div class="content">
-        <h3>${v.title}</h3>
-        ${buttonHTML}
-      </div>
-    `;
-
+    card.innerHTML = `<h3>${v.title}</h3>`;
+    card.addEventListener("click", () => {
+      if (v.embed) {
+        openModal(v.embed);
+      } else if (v.download) {
+        openDownloadModal(v.download);
+      }
+    });
     videoContainer.appendChild(card);
 
     if (v.tags) {
@@ -101,7 +93,18 @@ document.getElementById("add-video").addEventListener("click", () => {
   }
 
   videos.push({ title, tags, embed, download });
+  localStorage.setItem("videos", JSON.stringify(videos));
   renderVideos(videos);
+});
+
+// Modal handling
+function openModal(embed) {
+  modalVideo.innerHTML = embed;
+  videoModal.style.display = "flex";
+}
+document.getElementById("modal-close").addEventListener("click", () => {
+  videoModal.style.display = "none";
+  modalVideo.innerHTML = "";
 });
 
 // Gated download
@@ -110,26 +113,23 @@ function openDownloadModal(downloadUrl) {
   dlModal.dataset.downloadUrl = downloadUrl;
   dlModal.style.display = "block";
 }
-
 document.getElementById("dl-submit").addEventListener("click", async () => {
-  const name = document.getElementById("dl-name");
-  const email = document.getElementById("dl-email");
+  const name = document.getElementById("dl-name").value.trim();
+  const email = document.getElementById("dl-email").value.trim();
   const message = document.getElementById("dl-message");
 
-  if (!name.value.trim() || !email.value.trim()) {
+  if (!name || !email) {
     alert("Name and email are required");
     return;
   }
 
   message.textContent = "Adding you to the list...";
-
   try {
     const res = await fetch("/.netlify/functions/add-subscriber", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.value.trim(), email: email.value.trim() })
+      body: JSON.stringify({ name, email })
     });
-
     const result = await res.json();
 
     if (res.ok && result.message) {
