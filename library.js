@@ -15,7 +15,7 @@ let videos = [
 
 let allTags = new Set();
 let coffeeClicks = 0;
-let editingIndex = null; // Track which video is being edited
+let editingIndex = null;
 
 // ===== DOM references =====
 const coffeeCup = document.getElementById("coffee-cup");
@@ -49,37 +49,8 @@ function renderVideos(list) {
   list.forEach((v) => {
     const card = document.createElement("div");
     card.className = "card";
-    card.style.background = "#f5ebe0";
-    card.style.borderRadius = "10px";
-    card.style.boxShadow = "0 4px 10px rgba(0,0,0,0.15)";
-    card.style.padding = "15px";
-    card.style.cursor = "pointer";
-    card.style.textAlign = "center";
-    card.style.transition = "all 0.3s ease";
-
-    const title = document.createElement("h3");
-    title.innerText = v.title;
-    title.style.color = "#333";
-    title.style.margin = "0";
-    title.style.transition = "color 0.3s ease";
-
-    card.appendChild(title);
-
-    // Hover effect
-    card.addEventListener("mouseenter", () => {
-      card.style.background = "#a3b18a";
-      title.style.color = "#fff";
-    });
-    card.addEventListener("mouseleave", () => {
-      card.style.background = "#f5ebe0";
-      title.style.color = "#333";
-    });
-
-    // Click action
-    card.addEventListener("click", () => {
-      openModal(v);
-    });
-
+    card.innerHTML = `<h3>${v.title}</h3>`;
+    card.addEventListener("click", () => openModal(v));
     videoContainer.appendChild(card);
 
     if (v.tags) {
@@ -89,35 +60,30 @@ function renderVideos(list) {
   renderTags();
 }
 
-// ===== Render tag filters =====
+// ===== Render tags =====
 function renderTags() {
   tagsContainer.innerHTML = "";
   ["All", ...Array.from(allTags)].forEach(tag => {
-    const tagEl = document.createElement("span");
-    tagEl.className = "tag";
-    tagEl.textContent = tag;
-    tagEl.addEventListener("click", () => filterByTag(tag));
-    tagsContainer.appendChild(tagEl);
+    const el = document.createElement("span");
+    el.className = "tag";
+    el.textContent = tag;
+    el.addEventListener("click", () => filterByTag(tag));
+    tagsContainer.appendChild(el);
   });
 }
 
 function filterByTag(tag) {
-  if (tag === "All") {
-    renderVideos(videos);
-  } else {
-    const filtered = videos.filter(v => v.tags && v.tags.toLowerCase().includes(tag.toLowerCase()));
-    renderVideos(filtered);
-  }
+  if (tag === "All") renderVideos(videos);
+  else renderVideos(videos.filter(v => v.tags && v.tags.toLowerCase().includes(tag.toLowerCase())));
 }
 
 // ===== Search =====
 searchInput.addEventListener("input", () => {
   const term = searchInput.value.toLowerCase();
-  const filtered = videos.filter(v =>
+  renderVideos(videos.filter(v =>
     v.title.toLowerCase().includes(term) ||
     (v.tags && v.tags.toLowerCase().includes(term))
-  );
-  renderVideos(filtered);
+  ));
 });
 
 // ===== Add / Edit video =====
@@ -128,13 +94,9 @@ document.getElementById("add-video").addEventListener("click", () => {
   const pdf = document.getElementById("video-pdf")?.value.trim() || "";
   const download = document.getElementById("video-download").value.trim();
 
-  if (!title) {
-    alert("Title is required");
-    return;
-  }
+  if (!title) return alert("Title is required");
 
   const videoData = { title, tags, embed, pdf, download };
-
   if (editingIndex !== null) {
     videos[editingIndex] = videoData;
     editingIndex = null;
@@ -148,7 +110,7 @@ document.getElementById("add-video").addEventListener("click", () => {
   clearAdminForm();
 });
 
-// ===== Admin list with Edit buttons =====
+// ===== Admin list =====
 function renderAdminList() {
   const adminList = document.getElementById("admin-list") || document.createElement("div");
   adminList.id = "admin-list";
@@ -159,10 +121,7 @@ function renderAdminList() {
     item.textContent = `${v.title} (${v.tags}) `;
     const editBtn = document.createElement("button");
     editBtn.textContent = "Edit";
-    editBtn.style.marginLeft = "10px";
-    editBtn.onclick = () => {
-      loadVideoToForm(i);
-    };
+    editBtn.onclick = () => loadVideoToForm(i);
     item.appendChild(editBtn);
     adminList.appendChild(item);
   });
@@ -170,42 +129,34 @@ function renderAdminList() {
   adminPanel.appendChild(adminList);
 }
 
-// ===== Load video into form for editing =====
 function loadVideoToForm(index) {
   const v = videos[index];
   document.getElementById("video-title").value = v.title;
   document.getElementById("video-tags").value = v.tags;
   document.getElementById("video-embed").value = v.embed;
-  if (document.getElementById("video-pdf")) {
-    document.getElementById("video-pdf").value = v.pdf || "";
-  }
+  document.getElementById("video-pdf").value = v.pdf || "";
   document.getElementById("video-download").value = v.download;
   editingIndex = index;
 }
 
-// ===== Clear admin form =====
 function clearAdminForm() {
   document.getElementById("video-title").value = "";
   document.getElementById("video-tags").value = "";
   document.getElementById("video-embed").value = "";
-  if (document.getElementById("video-pdf")) {
-    document.getElementById("video-pdf").value = "";
-  }
+  document.getElementById("video-pdf").value = "";
   document.getElementById("video-download").value = "";
 }
 
-// ===== Modal with PDF fallback =====
+// ===== Modal =====
 function openModal(video) {
   modalVideo.innerHTML = "";
 
-  // Video/PDF container
   const videoWrapper = document.createElement("div");
-  videoWrapper.style.height = "90vh";
-  videoWrapper.style.width = "100%";
+  videoWrapper.style.width = "100vw";
+  videoWrapper.style.height = "100vh";
   videoWrapper.style.flex = "1";
   videoWrapper.innerHTML = video.embed;
 
-  // Download button (gated)
   const dlWrapper = document.createElement("div");
   dlWrapper.style.textAlign = "center";
   dlWrapper.style.marginTop = "15px";
@@ -217,14 +168,14 @@ function openModal(video) {
   modalVideo.appendChild(dlWrapper);
   videoModal.style.display = "flex";
 
-  // PDF fallback if Gamma doesn't load
+  // PDF fallback
   const iframe = document.getElementById("gamma-embed");
   if (iframe) {
     let loaded = false;
-    iframe.onload = () => { loaded = true; };
+    iframe.onload = () => loaded = true;
     setTimeout(() => {
       if (!loaded && video.pdf) {
-        videoWrapper.innerHTML = `<iframe src="${video.pdf}" style="width:100%;height:100%;border:none;"></iframe>`;
+        videoWrapper.innerHTML = `<iframe src="${video.pdf}" style="width:100vw;height:100vh;border:none;"></iframe>`;
       }
     }, 3000);
   }
@@ -236,21 +187,18 @@ document.getElementById("modal-close").addEventListener("click", () => {
 });
 
 // ===== Gated download =====
-function openDownloadModal(downloadUrl) {
+window.openDownloadModal = function(downloadUrl) {
   const dlModal = document.getElementById("download-modal");
   dlModal.dataset.downloadUrl = downloadUrl;
   dlModal.style.display = "block";
-}
+};
 
 document.getElementById("dl-submit").addEventListener("click", async () => {
   const name = document.getElementById("dl-name").value.trim();
   const email = document.getElementById("dl-email").value.trim();
   const message = document.getElementById("dl-message");
 
-  if (!name || !email) {
-    alert("Name and email are required");
-    return;
-  }
+  if (!name || !email) return alert("Name and email are required");
 
   message.textContent = "Adding you to the list...";
   try {
@@ -271,7 +219,7 @@ document.getElementById("dl-submit").addEventListener("click", async () => {
     } else {
       message.textContent = "Something went wrong. Please try again.";
     }
-  } catch (err) {
+  } catch {
     message.textContent = "Error connecting to server.";
   }
 });
