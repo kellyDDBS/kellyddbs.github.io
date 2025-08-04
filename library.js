@@ -1,4 +1,4 @@
-...// ===== Pre-loaded videos array =====
+// ===== Pre-loaded videos array =====
 let videos = [
   {
     title: "Starting with MailerLite from Scratch",
