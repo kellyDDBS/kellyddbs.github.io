@@ -1,12 +1,14 @@
 // Pre-loaded videos array
 let videos = [
   {
-    title: "MailerLite - Adding Your Emails and Domain",
+    title: "Starting with MailerLite from Scratch",
     tags: "SPF, Emails, MailerLite",
-    embed: `<iframe src="https://gamma.app/embed/ca6xz0wmw6bubrl"
+    embed: `<iframe id="gamma-embed"
+                    src="https://gamma.app/embed/ca6xz0wmw6bubrl"
                     style="width: 100%; height: 100%; border: none;"
                     allow="fullscreen"
                     title="Getting Started with MailerLite: Setup & DNS Configuration from Scratch"></iframe>`,
+    pdf: `https://drive.google.com/file/d/1HOaDYl6pJcb4iFToTT-PbrYCF089gkmn/preview`,
     download: "https://drive.google.com/file/d/1HOaDYl6pJcb4iFToTT-PbrYCF089gkmn/view?usp=drive_link"
   }
 ];
@@ -73,7 +75,7 @@ function renderVideos(list) {
     // Click action
     card.addEventListener("click", () => {
       if (v.embed) {
-        openModal(v.embed, v.download);
+        openModal(v);
       } else if (v.download) {
         openDownloadModal(v.download);
       }
@@ -124,6 +126,7 @@ document.getElementById("add-video").addEventListener("click", () => {
   const title = document.getElementById("video-title").value.trim();
   const tags = document.getElementById("video-tags").value.trim();
   const embed = document.getElementById("video-embed").value.trim();
+  const pdf = document.getElementById("video-pdf")?.value.trim() || "";
   const download = document.getElementById("video-download").value.trim();
 
   if (!title) {
@@ -131,21 +134,36 @@ document.getElementById("add-video").addEventListener("click", () => {
     return;
   }
 
-  videos.push({ title, tags, embed, download });
+  videos.push({ title, tags, embed, pdf, download });
   localStorage.setItem("videos", JSON.stringify(videos));
   renderVideos(videos);
 });
 
-// Modal handling
-function openModal(embed, downloadUrl) {
-  let html = `<div style="width:100%; height:100%;">${embed}</div>`;
-  if (downloadUrl) {
-    html += `<div style="margin-top:15px; text-align:center;">
-               <a href="${downloadUrl}" target="_blank" class="button">⬇ Download this resource</a>
-             </div>`;
-  }
-  modalVideo.innerHTML = html;
+// Modal handling with PDF fallback
+function openModal(video) {
+  modalVideo.innerHTML = video.embed;
   videoModal.style.display = "flex";
+
+  const iframe = document.getElementById("gamma-embed");
+
+  if (iframe) {
+    let loaded = false;
+    iframe.onload = () => { loaded = true; };
+    setTimeout(() => {
+      if (!loaded) {
+        modalVideo.innerHTML = `<iframe src="${video.pdf}" style="width:100%;height:100%;border:none;"></iframe>`;
+      }
+    }, 3000); // 3s timeout before swapping to PDF
+  }
+
+  // Add download button if available
+  if (video.download) {
+    const dlBtn = document.createElement("div");
+    dlBtn.style.textAlign = "center";
+    dlBtn.style.marginTop = "15px";
+    dlBtn.innerHTML = `<a href="${video.download}" target="_blank" class="button">⬇ Download this resource</a>`;
+    modalVideo.appendChild(dlBtn);
+  }
 }
 
 document.getElementById("modal-close").addEventListener("click", () => {
